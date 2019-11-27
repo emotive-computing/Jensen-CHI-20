@@ -1,0 +1,182 @@
+---
+title: "Display Best Models"
+author: "Emily Jensen"
+date: "November 27, 2019"
+output: pdf_document
+---
+
+```{r setup, echo=FALSE,warning=FALSE,message=FALSE}
+# Imports
+library(lme4);
+library(ggplot2);
+library(reshape2);
+library(GGally)
+library(plyr)
+library(ppcor)
+library(data.table)
+library(readstata13)
+library(gridExtra)
+library(grid)
+library(dplyr)
+library(stats)
+
+#Formats multiple plots together
+multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+  library(grid)
+
+  # Make a list from the ... arguments and plotlist
+  plots <- c(list(...), plotlist)
+
+  numPlots = length(plots)
+
+  # If layout is NULL, then use 'cols' to determine layout
+  if (is.null(layout)) {
+    # Make the panel
+    # ncol: Number of columns of plots
+    # nrow: Number of rows needed, calculated from # of cols
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                    ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+
+ if (numPlots==1) {
+    print(plots[[1]])
+
+  } else {
+    # Set up the page
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+
+    # Make each plot, in the correct location
+    for (i in 1:numPlots) {
+      # Get the i,j matrix positions of the regions that contain this subplot
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+
+# Wrapper function to print relevant data for a specific talk feature
+# varName is the coded talk feature: "IsQuestion"
+# modelName is an internal label, we are displaying the best performing ex: "_obs_scaled"
+# xlabel is label for x axis
+print_variable <- function(varName, modelName, xlabel) {
+  # Below is for printing summary stats
+  var_data <- read.csv(paste0("C:/Users/emje6419/Dropbox (Emotive Computing)/Emily CETD/3ModelResults/",varName,"_summary.csv"), row.names = 1)
+  
+  if (endsWith(modelName,"_mean_scaled")) {
+    tl <- "Combined Model"
+  } else if (endsWith(modelName,"_obs_scaled")) {
+    tl <- "Global Session Model"
+  } else {
+    tl <- "Local Context Model"
+  }
+  
+  print(varName)
+  print(paste("Model:",tl))
+  
+  if(startsWith(modelName,"_hier")) {
+    print(paste("Human mean:", format(var_data["human_hier","mean"], digits=3)))
+  } else {
+    print(paste("Human mean:", format(var_data["human_total","mean"], digits=3)))
+  }
+  
+  print(paste("Computer mean:", format(var_data[modelName,"mean"], digits=3)))
+  
+  # fancy filtering. Keep rows where column variable == varName + modelName (ex: IsQuestion_obs_scaled)
+  # Then select columns ObsID, true_proportion renamed as Human, pred_proportion renamed as Computer
+  data.sub <- data %>% filter(variable==paste0(varName,modelName)) %>% select(ObsID, Human=true_proportion, Computer=pred_proportion)
+  
+  # Melt data so each row is a point to plot
+  data.sub.melt <- melt(data.sub, id = "ObsID")
+  # rename column named variable to prediction
+  setnames(data.sub.melt,"variable","Prediction")
+  
+  # density plot. use data in data.sub.melt, plotting numbers found in "value" column. 
+  # separate plots for each unique value in Prediction column (human, computer)
+  density <- ggplot(data.sub.melt, aes(x=value)) + geom_density(aes(group=Prediction, colour=Prediction, fill=Prediction), alpha=0.5) + scale_fill_manual(values = c("#000000", "#56B4E9")) + theme(legend.position = c(0.9, 0.8), legend.background = element_rect(fill="transparent")) + ggtitle(tl) +xlab(paste("Proportion",xlabel)) + ylab("Density");
+  
+  tl2 <- paste(tl, "( r = ", format(var_data[modelName,"spearman_r"], digits = 3), ")");
+  # this one does not use melted data, choose which two columns (Human, Computer) to graph against each other. Produces a scatter plot
+  scatter <- ggplot(data.sub, aes(Human, Computer)) + geom_point() + geom_smooth(method=lm, se = TRUE) + ggtitle(tl2) + xlab ("Human-Coded") + ylab("Computer-Estimated");
+  # This sticks the plots together, you can also just call "density" or "scatter" independently
+  multiplot(density, scatter, cols=2)
+}
+
+data <- read.csv("C:/Users/emje6419/Dropbox (Emotive Computing)/Emily CETD/obs_level_results-1.csv")
+```
+
+```{r global_options, include=FALSE}
+#Formatting
+knitr::opts_chunk$set(fig.width=10, fig.height=5,
+                      echo=FALSE, warning=FALSE, message=FALSE, width=1024)
+theme_update(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"));
+theme_update(axis.text=element_text(size=12), axis.title=element_text(size=16));
+theme_update(strip.text = element_text(size=16));
+
+```
+
+# Model Results
+
+This documents displays the human/predicted distributions and model performance for each of the talk features described in the paper. The best performing model for each feature is reported here.
+
+## Instructional Talk
+
+```{r instr_utt, echo=FALSE}
+
+print_variable("IsInstructionalUtterance","_mean_scaled", "Instructional Talk")
+
+```
+
+\newpage
+
+## Questions
+
+```{r question, echo=FALSE}
+
+print_variable("IsQuestion","_mean_scaled", "Questions")
+
+```
+
+## Open-Ended Questions
+
+```{r authenticity, echo=FALSE}
+
+print_variable("Authenticity", "_obs_scaled", "Authentic Questions")
+
+```
+
+
+## Elaborated Evaluation
+
+```{r elab_eval, echo=FALSE}
+
+print_variable("IsEvaluationElaborated","_mean_scaled", "Elaborated Evaluation")
+
+```
+
+
+## High Cognitive Level
+
+```{r cog_level, echo=FALSE}
+
+print_variable("CogLevel","_mean_scaled", "High Cognitive Level")
+
+```
+
+## ELA Terms Present
+
+```{r ela_terms, echo=FALSE}
+
+print_variable("IsDisciplinaryTermsPresent","_obs_scaled", "ELA Terms Present")
+
+```
+
+## Goal Specified
+
+```{r goals, echo=FALSE}
+
+print_variable("IsGoalSpecified","_obs_scaled", "Goal Specification")
+
+```
