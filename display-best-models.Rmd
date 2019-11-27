@@ -59,11 +59,11 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
 
 # Wrapper function to print relevant data for a specific talk feature
 # varName is the coded talk feature: "IsQuestion"
-# modelName is an internal label, we are displaying the best performing ex: "_obs_scaled"
+# modelName is an internal label, we are displaying the best performing ex: "_obs_scaled", "_utt_scaled", "_mean_scaled"
 # xlabel is label for x axis
 print_variable <- function(varName, modelName, xlabel) {
   # Below is for printing summary stats
-  var_data <- read.csv(paste0("C:/Users/emje6419/Dropbox (Emotive Computing)/Emily CETD/3ModelResults/",varName,"_summary.csv"), row.names = 1)
+  var_data <- read.csv(paste0("path","/",varName,"_summary.csv"), row.names = 1)
   
   if (endsWith(modelName,"_mean_scaled")) {
     tl <- "Combined Model"
@@ -75,13 +75,7 @@ print_variable <- function(varName, modelName, xlabel) {
   
   print(varName)
   print(paste("Model:",tl))
-  
-  if(startsWith(modelName,"_hier")) {
-    print(paste("Human mean:", format(var_data["human_hier","mean"], digits=3)))
-  } else {
-    print(paste("Human mean:", format(var_data["human_total","mean"], digits=3)))
-  }
-  
+  print(paste("Human mean:", format(var_data["human_total","mean"], digits=3)))
   print(paste("Computer mean:", format(var_data[modelName,"mean"], digits=3)))
   
   # fancy filtering. Keep rows where column variable == varName + modelName (ex: IsQuestion_obs_scaled)
@@ -95,7 +89,7 @@ print_variable <- function(varName, modelName, xlabel) {
   
   # density plot. use data in data.sub.melt, plotting numbers found in "value" column. 
   # separate plots for each unique value in Prediction column (human, computer)
-  density <- ggplot(data.sub.melt, aes(x=value)) + geom_density(aes(group=Prediction, colour=Prediction, fill=Prediction), alpha=0.5) + scale_fill_manual(values = c("#000000", "#56B4E9")) + theme(legend.position = c(0.9, 0.8), legend.background = element_rect(fill="transparent")) + ggtitle(tl) +xlab(paste("Proportion",xlabel)) + ylab("Density");
+  density <- ggplot(data.sub.melt, aes(x=value)) + geom_density(aes(group=Prediction, colour=Prediction, fill=Prediction), alpha=0.5) + scale_fill_manual(values = c("#000000", "#56B4E9")) + theme(legend.position = c(0.9, 0.8), legend.background = element_rect(fill="transparent")) + ggtitle(tl) +xlab(paste("Proportion",xlabel)) + ylab("Density") + xlim(0,1);
   
   tl2 <- paste(tl, "( r = ", format(var_data[modelName,"spearman_r"], digits = 3), ")");
   # this one does not use melted data, choose which two columns (Human, Computer) to graph against each other. Produces a scatter plot
@@ -104,7 +98,8 @@ print_variable <- function(varName, modelName, xlabel) {
   multiplot(density, scatter, cols=2)
 }
 
-data <- read.csv("C:/Users/emje6419/Dropbox (Emotive Computing)/Emily CETD/obs_level_results-1.csv")
+path <- "your_path_to_results_here"
+data <- read.csv(paste0(path,"/processed-predictions.csv"))
 ```
 
 ```{r global_options, include=FALSE}
