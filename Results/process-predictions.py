@@ -2,7 +2,7 @@
 import pandas as pd
 import numpy as np
 import math
-from scipy.stats import zscore, spearmanr, t
+from scipy.stats import spearmanr, t
 from sklearn.preprocessing import MinMaxScaler
 
 # Calculates Spearman correlation between labels and predictions
@@ -26,11 +26,12 @@ variables_labels = {
 
 
 # Directories for utterance- and observation-level predictions
-utt_level_pred_dir = 'C:/Users/emje6419/Dropbox (Emotive Computing)/Emily CETD/utterance-results/predictions/RandomForestClassifier/'
-obs_level_pred_dir = 'C:/Users/emje6419/Dropbox (Emotive Computing)/Emily CETD/Cathlyn_EDM/obs_true_results_'
+repo_path = "your_path_to_repo"
+utt_level_pred_dir = repo_path + 'Predictions/utterance-level-predictions/'
+obs_level_pred_dir = repo_path + 'Predictions/observation-level-predictions/'
 
-target_file = 'C:/Users/emje6419/Dropbox (Emotive Computing)/Emily CETD/Deliverables/CHI 2020/Online Results/processed-predictions.csv'
-results_dir = 'C:/Users/emje6419/Dropbox (Emotive Computing)/Emily CETD/Deliverables/CHI 2020/Online Results/'
+target_file = repo_path + 'Results/processed-predictions.csv'
+results_dir = repo_path + 'Results/'
 
 # %% Create long format data of predicted and observed proportion of each feature
 
@@ -86,7 +87,7 @@ for variable in variables_labels:
     outdf.to_csv(target_file, header=False, mode='a')
     
     # Get observation-level prediction data
-    obs_level_preds = obs_level_pred_dir + variable + '/predictions/RandomForestRegressor/AvgCombinedVarInObs-LanguageFeatureInput-predictions.csv'
+    obs_level_preds = obs_level_pred_dir + variable + '_AvgCombinedVarInObs-LanguageFeatureInput-predictions.csv'
     data = pd.read_csv(obs_level_preds).sort_values(by=['ObsID'])
     
     ## Get raw predictions

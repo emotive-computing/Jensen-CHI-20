@@ -63,7 +63,7 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
 # xlabel is label for x axis
 print_variable <- function(varName, modelName, xlabel) {
   # Below is for printing summary stats
-  var_data <- read.csv(paste0("path","/",varName,"_summary.csv"), row.names = 1)
+  var_data <- read.csv(paste0(path,"/",varName,"_summary.csv"), row.names = 1)
   
   if (endsWith(modelName,"_mean_scaled")) {
     tl <- "Combined Model"
@@ -98,7 +98,7 @@ print_variable <- function(varName, modelName, xlabel) {
   multiplot(density, scatter, cols=2)
 }
 
-path <- "your_path_to_results_here"
+path <- "your_path_to_repo"
 data <- read.csv(paste0(path,"/processed-predictions.csv"))
 ```
 
