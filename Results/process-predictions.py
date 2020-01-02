@@ -26,7 +26,7 @@ variables_labels = {
 
 
 # Directories for utterance- and observation-level predictions
-repo_path = "your_path_to_repo"
+repo_path = "your_path_to_repo/"
 utt_level_pred_dir = repo_path + 'Predictions/utterance-level-predictions/'
 obs_level_pred_dir = repo_path + 'Predictions/observation-level-predictions/'
 
