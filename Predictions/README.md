@@ -1,0 +1,1 @@
+The ```settings-*.py``` files are used in the emotive-computing/common-models repository to generate the original predictions. These predictions are processed in the utterance-level and observation-level files.
